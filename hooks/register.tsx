@@ -6,6 +6,7 @@ import { bandSegments, paneView, summaryText } from '../src/render.ts'
 import { type Step, type Timeline, createTimeline, currentStep, finishStep, startStep } from '../src/timeline.ts'
 
 const PANE_ID = 'flight-recorder'
+const INLINE_ROWS = 12
 const USAGE = 'Usage: /fr [export [path] | clear]'
 
 let timeline: Timeline = createTimeline()
@@ -45,7 +46,11 @@ async function startTicker($) {
 
 async function finish($, step: Step | null, failed: boolean, error?: string) {
   if (!step) return
-  finishStep(step, failed ? 'fail' : 'ok', await $.clock.now(), error)
+  let now = step.startedAt
+  try {
+    now = await $.clock.now()
+  } catch {}
+  finishStep(step, failed ? 'fail' : 'ok', now, error)
   const warning = onStepFinish(alerts, step, config)
   if (warning) $.ui.toast(warning)
   $.ui.invalidate('ui.render')
@@ -73,7 +78,7 @@ async function togglePane($): Promise<{ text?: string }> {
     await $.ui.close({ id: PANE_ID })
     return {}
   }
-  const opened = await $.ui.open({ id: PANE_ID, title: 'Flight Recorder' })
+  const opened = await $.ui.open({ id: PANE_ID, title: 'Flight Recorder', rows: INLINE_ROWS })
   return opened.isPlaced ? {} : { text: 'Pane not shown: ' + (opened.reason ?? 'not enough room') }
 }
 
@@ -167,7 +172,7 @@ export function register(on, options) {
   on('ui.render', { component: 'Pane' }, async ($, e, next) => {
     if (e.requestId !== PANE_ID) return next(e)
     const { Box, Text, Button } = $.ui.resolve(e)
-    const rowsAvailable = e.props.placement === 'dock' ? e.props.scroll.bodyRows - 3 : 20
+    const rowsAvailable = (e.props.placement === 'dock' ? e.props.scroll.bodyRows : INLINE_ROWS) - 3
     const view = paneView(timeline, await $.clock.now(), e.props.bodyColumns, rowsAvailable)
     return (
       <Box flexDirection="column">

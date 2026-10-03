@@ -121,3 +121,35 @@ test('band draws the summary after the first step', async ($, on) => {
   const after = await $.ui.mount(BAND as any)
   expect(await after.find({ type: 'Text', text: /^1 step · 0 edits · 0 fails/ })).toBeDefined()
 })
+
+test('a step still finishes when the clock call rejects after the tool ran', async ($, on) => {
+  const written = new Map<string, string>()
+  let calls = 0
+  on('clock.now', () => (++calls === 2 ? { deny: 'aborted' } : { value: new Date(2026, 9, 3, 14, 0, 0).getTime() }))
+  on('clock.every', () => ({ value: { cancel() {} } }))
+  on('session.cwd', () => ({ value: '/work' }))
+  on('session.root', () => ({ value: '/work' }))
+  on('ui.toast', () => ({ value: undefined }))
+  on('ui.log', () => ({ value: undefined }))
+  on('fs.exists', ($: any, e: any) => ({ value: written.has(e.path) }))
+  on('fs.write', ($: any, e: any) => { written.set(e.path, e.text); return { value: undefined } })
+  on('tool.call', () => ({ result: 'ok' }))
+  await $.tool.call({ tool: 'Bash', command: 'npm test' })
+  await $.command.run({ command: 'fr', args: 'export' })
+  const md = [...written.values()][0] ?? ''
+  expect(md).toContain('| Bash npm test | ok |')
+  expect(md).not.toContain('running')
+})
+
+test('an inline pane shows the newest steps within the rows it asked for', async ($, on) => {
+  stubSession(on, new Map(), [])
+  on('tool.call', () => ({ result: 'ok' }))
+  for (let i = 0; i < 30; i++) await $.tool.call({ tool: 'Read', file_path: '/work/f' + i + '.ts' })
+  const ui = await $.ui.mount({
+    plugin: 'stepscope', component: 'Pane', requestId: 'flight-recorder', surface: 'terminal',
+    viewport: { columns: 100, rows: 30 },
+    props: { title: 'Flight Recorder', isFocused: false, bodyColumns: 60, placement: 'inline', scroll: { offset: 0, bodyRows: 4 }, view: {} },
+  } as any)
+  expect(await ui.find({ type: 'Text', text: /f29\.ts/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /f20\.ts/ })).toBeUndefined()
+})

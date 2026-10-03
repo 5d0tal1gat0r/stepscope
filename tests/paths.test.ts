@@ -17,11 +17,19 @@ test('isInside respects segment boundaries', async () => {
   expect(isInside('/etc/passwd', '/repo/')).toBe(false)
 })
 
-test('isInside never flags non-POSIX paths', async () => {
-  expect(isInside('C:\\x\\a.ts', 'C:\\repo')).toBe(true)
-})
 
 test('relativeTo strips the root only when inside', async () => {
   expect(relativeTo('/repo/src/a.ts', '/repo')).toBe('src/a.ts')
   expect(relativeTo('/other/a.ts', '/repo')).toBe('/other/a.ts')
+})
+
+test('Windows paths: drive letters, backslashes, case-insensitive root', async () => {
+  expect(resolvePath('src\\a.ts', 'C:\\proj')).toBe('C:/proj/src/a.ts')
+  expect(resolvePath('..\\x.md', 'C:\\proj\\sub')).toBe('C:/proj/x.md')
+  expect(resolvePath('D:\\other\\a.ts', 'C:\\proj')).toBe('D:/other/a.ts')
+  expect(isInside('C:\\proj\\src\\a.ts', 'C:\\proj')).toBe(true)
+  expect(isInside('c:/PROJ/src/a.ts', 'C:\\proj')).toBe(true)
+  expect(isInside('C:\\Windows\\x', 'C:\\proj')).toBe(false)
+  expect(isInside('D:\\proj\\a.ts', 'C:\\proj')).toBe(false)
+  expect(relativeTo('C:\\proj\\src\\a.ts', 'C:\\proj')).toBe('src/a.ts')
 })
