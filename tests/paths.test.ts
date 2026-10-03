@@ -1,0 +1,35 @@
+import { expect, test } from 'claude-code/testing'
+import { isInside, relativeTo, resolvePath } from '../src/paths.ts'
+
+test('resolvePath handles relative, dot segments and absolute', async () => {
+  expect(resolvePath('src/a.ts', '/repo')).toBe('/repo/src/a.ts')
+  expect(resolvePath('./src/../b.ts', '/repo/')).toBe('/repo/b.ts')
+  expect(resolvePath('../../etc/x', '/repo/sub')).toBe('/etc/x')
+  expect(resolvePath('/abs/x', '/repo')).toBe('/abs/x')
+  expect(resolvePath('../../../..', '/a')).toBe('/')
+  expect(resolvePath('my notes.md', '/repo')).toBe('/repo/my notes.md')
+})
+
+test('isInside respects segment boundaries', async () => {
+  expect(isInside('/repo/src/a.ts', '/repo')).toBe(true)
+  expect(isInside('/repo', '/repo')).toBe(true)
+  expect(isInside('/repo-other/a.ts', '/repo')).toBe(false)
+  expect(isInside('/etc/passwd', '/repo/')).toBe(false)
+})
+
+
+test('relativeTo strips the root only when inside', async () => {
+  expect(relativeTo('/repo/src/a.ts', '/repo')).toBe('src/a.ts')
+  expect(relativeTo('/other/a.ts', '/repo')).toBe('/other/a.ts')
+})
+
+test('Windows paths: drive letters, backslashes, case-insensitive root', async () => {
+  expect(resolvePath('src\\a.ts', 'C:\\proj')).toBe('C:/proj/src/a.ts')
+  expect(resolvePath('..\\x.md', 'C:\\proj\\sub')).toBe('C:/proj/x.md')
+  expect(resolvePath('D:\\other\\a.ts', 'C:\\proj')).toBe('D:/other/a.ts')
+  expect(isInside('C:\\proj\\src\\a.ts', 'C:\\proj')).toBe(true)
+  expect(isInside('c:/PROJ/src/a.ts', 'C:\\proj')).toBe(true)
+  expect(isInside('C:\\Windows\\x', 'C:\\proj')).toBe(false)
+  expect(isInside('D:\\proj\\a.ts', 'C:\\proj')).toBe(false)
+  expect(relativeTo('C:\\proj\\src\\a.ts', 'C:\\proj')).toBe('src/a.ts')
+})
