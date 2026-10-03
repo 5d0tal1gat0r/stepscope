@@ -2,7 +2,7 @@
 // sequences or credentials. Everything shown or exported passes through here.
 
 const WHITESPACE_CONTROLS = /[\t\n\r]/g
-const OTHER_CONTROLS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‎‏‪-‮⁦-⁩]/g
+const OTHER_CONTROLS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g
 
 export function stripControl(text: string): string {
   return text.replace(WHITESPACE_CONTROLS, ' ').replace(OTHER_CONTROLS, '')

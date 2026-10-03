@@ -3,7 +3,7 @@ import { redactSecrets, stripControl } from '../src/redact.ts'
 
 test('stripControl removes C0/C1 controls and bidi overrides', async () => {
   expect(stripControl('a\x1b[31mb\x07c\x9bd')).toBe('a[31mbcd')
-  expect(stripControl('safe‮evil⁦x')).toBe('safeevilx')
+  expect(stripControl('safe\u202eevil\u2066x')).toBe('safeevilx')
   expect(stripControl('tab\tand\nnewline')).toBe('tab and newline')
 })
 

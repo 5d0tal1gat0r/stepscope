@@ -45,8 +45,12 @@ Set with `/plugin configure stepscope@<marketplace>`:
   memory, for the current session only. Nothing is saved between sessions.
 - Never changes, blocks or approves a tool call.
 - No network access, no processes, no model calls.
-- Writes a file only when you run `/fr export` or press **Export**, at the
-  path shown in the reply.
+- Writes exactly one kind of file: the Markdown session log, and only when
+  you run `/fr export [path]` or press **Export**. The default path is
+  `flight-recorder-YYYYMMDD-HHMM.md` in the project root; with `[path]` it is
+  the path you type, resolved against the project root. It refuses to
+  overwrite an existing file, and it never writes build, start-up, settings
+  or instruction files. The reply shows the exact path written.
 - Strips terminal control characters from everything it shows or exports,
   and redacts common secret shapes (GitHub, OpenAI-style, Slack, AWS and
   Google keys, `*_TOKEN=`/`*_PASSWORD=` style assignments, `Authorization`
