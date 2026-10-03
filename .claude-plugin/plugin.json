@@ -1,0 +1,31 @@
+{
+  "name": "stepscope",
+  "displayName": "Stepscope — flight recorder for Claude Code",
+  "version": "0.1.0",
+  "description": "Live timeline of every tool call Claude makes: a band above the prompt, a timeline pane, alerts when Claude loops or edits outside the project, and a Markdown export for review.",
+  "author": { "name": "5d0tal1gat0r" },
+  "license": "MIT",
+  "homepage": "https://github.com/5d0tal1gat0r/stepscope",
+  "repository": "https://github.com/5d0tal1gat0r/stepscope",
+  "keywords": ["mod", "timeline", "observability", "review"],
+  "userConfig": {
+    "failStreak": {
+      "type": "number",
+      "title": "Failure streak",
+      "description": "Failures in a row of the same shell command before the loop alert",
+      "default": 3
+    },
+    "longStepSeconds": {
+      "type": "number",
+      "title": "Long step (seconds)",
+      "description": "Seconds before a running step turns the band amber",
+      "default": 60
+    },
+    "showBand": {
+      "type": "boolean",
+      "title": "Show band",
+      "description": "Show the one-line summary above the prompt",
+      "default": true
+    }
+  }
+}
