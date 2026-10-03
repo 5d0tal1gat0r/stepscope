@@ -47,6 +47,11 @@ Set with `/plugin configure stepscope@<marketplace>`:
 - No network access, no processes, no model calls.
 - Writes a file only when you run `/fr export` or press **Export**, at the
   path shown in the reply.
+- Strips terminal control characters from everything it shows or exports,
+  and redacts common secret shapes (GitHub, OpenAI-style, Slack, AWS and
+  Google keys, `*_TOKEN=`/`*_PASSWORD=` style assignments, `Authorization`
+  headers, passwords in URLs). Redaction is best effort: read an exported
+  log before you share it.
 
 ## Development
 

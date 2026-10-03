@@ -37,3 +37,17 @@ test('normalizeCommand and icons', async () => {
   expect(normalizeCommand(' a \t b ')).toBe('a b')
   expect(ICONS).toEqual({ edit: '✎', bash: '$', read: '◎', other: '·' })
 })
+
+test('labels are sanitized: control chars stripped, secrets redacted before truncation', async () => {
+  const s = describeCall('1', 'Bash', { command: 'echo \x1b]0;pwn\x07hi' }, '/r', '/r')
+  expect(s.label).toBe('echo ]0;pwnhi')
+  const t = describeCall('2', 'Bash', { command: 'GITHUB_TOKEN=' + 'z'.repeat(80) + ' gh pr list' }, '/r', '/r')
+  expect(t.label).toBe('GITHUB_TOKEN=[redacted] gh pr list')
+  const e = describeCall('3', 'Edit', { file_path: '/r/a\x1b[2J.ts' }, '/r', '/r')
+  expect(e.path).toBe('/r/a[2J.ts')
+})
+
+test('stored command is capped at 2000 chars', async () => {
+  const s = describeCall('1', 'Bash', { command: 'y'.repeat(5000) }, '/r', '/r')
+  expect(s.command?.length).toBe(2000)
+})

@@ -53,3 +53,10 @@ test('currentStep is the newest running step; parallel steps finish independentl
   expect(currentStep(t)).toBeUndefined()
   expect(lastFinished(t)?.id).toBe('a')
 })
+
+test('error text is sanitized and redacted', async () => {
+  const t = createTimeline()
+  const s = startStep(t, info('a'), 0)
+  finishStep(s, 'fail', 1, '\x1b[31mAuthorization: Bearer abc123 failed')
+  expect(s.error).toBe('[31mAuthorization: Bearer [redacted] failed')
+})

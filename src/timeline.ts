@@ -1,3 +1,5 @@
+import { sanitize } from './redact.ts'
+
 export type StepStatus = 'running' | 'ok' | 'fail'
 export type StepKind = 'edit' | 'bash' | 'read' | 'other'
 
@@ -56,7 +58,7 @@ export function finishStep(step: Step, status: 'ok' | 'fail', now: number, error
 
 function firstLine(text: string, max: number): string {
   const line = text.split('\n').find(l => l.trim() !== '') ?? ''
-  return line.trim().slice(0, max)
+  return sanitize(line).trim().slice(0, max)
 }
 
 export function counts(t: Timeline, now: number): Counts {
