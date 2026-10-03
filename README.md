@@ -7,6 +7,8 @@ you open with `/fr`. It warns you when Claude looks stuck or edits files
 outside your project, and exports a clean Markdown log you can read before
 you commit or paste into a pull request.
 
+![Stepscope timeline pane and band in Claude Code](docs/images/stepscope.png)
+
 ## Requirements
 
 - Claude Code v2.1.287 or later (mods). Tested with 2.1.287.
